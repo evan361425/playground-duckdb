@@ -130,3 +130,5 @@ dmypy.json
 
 data/
 **/*.png
+**/*.zip
+src/constant.py
