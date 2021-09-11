@@ -53,13 +53,27 @@ def drawSmallDf(df: pd.DataFrame, name: str):
     drawDataframe(metadata=metadata, details=getDetail(query), filename=name)
 
 
+def getPalette():
+    return {
+        200: "green",
+        302: "blue",
+        400: "yellow",
+        401: "gold",
+        403: "yellow",
+        404: "yellow",
+        500: "red",
+        504: "black",
+    }
+
+
 def drawDataframe(
     metadata: dict[str, Any],
     details: pd.DataFrame,
     filename: str,
     col: str = "url_clean_path",
 ):
-    if len(metadata[col]) == 0:
+    dataSize = len(metadata[col])
+    if dataSize == 0:
         return
 
     print("  - setup painting")
@@ -71,10 +85,11 @@ def drawDataframe(
         kind="hist",
         legend=useHue,
         col=col,
-        col_wrap=len(metadata[col]) if len(metadata[col]) < 3 else 3,
+        col_wrap=dataSize if dataSize < 3 else 3,
         col_order=metadata[col],
         aspect=2,
         multiple="stack" if useHue else "layer",
+        palette=getPalette(),
         kde=True,
         facet_kws={
             "sharex": not useHue,
@@ -159,7 +174,10 @@ for group in GROUP_PREFIXES:
     if not smallDf.empty:
         drawSmallDf(smallDf, "%s-small" % groupName)
 
+    # continue
+
     for path in bigDf["url_clean_path"].tolist():
+        print("  - splitting %s" % path)
         metadata = getMetadata("= '%s'" % path, "http_status").to_dict(orient="list")
         details = getDetail("url_clean_path = '%s'" % path)
         filename = "-".join(path.split("/"))
